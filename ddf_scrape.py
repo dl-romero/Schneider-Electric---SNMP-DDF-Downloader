@@ -1,7 +1,7 @@
-import requests
 import json
 import os
 import os.path
+import requests
 
 def get_ddf_list():
     """Gets the SNMP DDF List in JSON from SE."""
@@ -15,6 +15,7 @@ def get_ddf_list():
     return response.text
 
 def download_ddf(ddf_id, ddf_filename, ddf_state):
+    """Downloads the DDF file."""
     url = "https://ddf.ecostruxureit.com/ddfsearchapi/ddf/" + str(ddf_id) + "/download"
     payload={}
     headers = {}
@@ -24,7 +25,7 @@ def download_ddf(ddf_id, ddf_filename, ddf_state):
         open('ddf_files/' + str(ddf_state).lower() + '/' + str(ddf_filename), 'wb').write(response.content)
     else:
         open('ddf_files/' + str(ddf_state).lower() + '/' + str(ddf_filename), 'wb').write(response.content)
-        
+
 def process_new():
     """Downloads the complete DDF set."""
     get_ddf_list()
@@ -32,19 +33,11 @@ def process_new():
     for ddf in ddf_list:
         ddf_id = ddf['id']
         ddf_filename = ddf['fileName']
-        ddf_filepath = ddf['filePath']
-        ddf_name = ddf['ddfName']
-        ddf_ddfid = ddf['ddfId']
-        ddf_version = ddf['ddfVersion']
-        ddf_models = ddf['models']
-        ddf_vendors = ddf['vendors']
-        ddf_device_types = ddf['deviceTypes']
-        ddf_type = ddf['ddfType']
         ddf_state = ddf['ddfState']
         download_ddf(ddf_id, ddf_filename, ddf_state)
     os.chdir('ddf_files')
-    os.rename('ddf_manifest_download.json','ddf_manifest.json') 
-        
+    os.rename('ddf_manifest_download.json','ddf_manifest.json')
+
 def process_upgrade():
     """Upgrades DDF Files based on Version."""
     ddf_version_dictionary = {}
@@ -56,17 +49,10 @@ def process_upgrade():
         for ddf in ddf_list:
             ddf_id = ddf['id']
             ddf_filename = ddf['fileName']
-            ddf_filepath = ddf['filePath']
-            ddf_name = ddf['ddfName']
-            ddf_ddfid = ddf['ddfId']
             ddf_version = ddf['ddfVersion']
-            ddf_models = ddf['models']
-            ddf_vendors = ddf['vendors']
-            ddf_device_types = ddf['deviceTypes']
-            ddf_type = ddf['ddfType']
             ddf_state = ddf['ddfState']
             try:
-                # Making attempt to check DDF version. 
+                # Making attempt to check DDF version.
                 if ddf_version_dictionary[str(ddf_filename)] != ddf_version:
                     download_ddf(ddf_id, ddf_filename, ddf_state)
             except:
